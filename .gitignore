@@ -2,12 +2,24 @@
 .venv/
 
 # Python
-**/__pycache__/
+__pycache__/
 *.py[cod]
 .pytest_cache/
 
-# Environment files
+# Environment
+.env
 backend/.env
 
 # IDE
 .vscode/
+
+# Test database
+test.db
+.coverage
+
+# React
+node_modules/
+dist/
+
+# Generated coverage HTML (regenerate via TEST_REPORT.md instructions)
+test-report/coverage/
