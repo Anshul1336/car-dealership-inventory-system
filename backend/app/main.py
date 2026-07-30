@@ -6,6 +6,9 @@ from app.modules.auth.model import User
 from app.modules.auth.router import router as auth_router
 from app.modules.vehicles.model import Vehicle
 
+from app.modules.vehicles.router import router as vehicle_router
+
+
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -32,3 +35,4 @@ def db_check():
     return {"message": "Database connected successfully!"}
 
 app.include_router(auth_router)
+app.include_router(vehicle_router)

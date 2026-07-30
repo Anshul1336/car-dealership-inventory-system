@@ -31,9 +31,9 @@ class VehicleUpdate(BaseModel):
     model: Optional[str] = None
     year: Optional[int] = None
 
-    category: Optional[str] = None
-    fuel_type: Optional[str] = None
-    transmission: Optional[str] = None
+    category: Optional[Category] = None
+    fuel_type: Optional[FuelType] = None
+    transmission: Optional[Transmission] = None
 
     color: Optional[str] = None
 
