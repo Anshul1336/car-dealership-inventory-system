@@ -4,6 +4,7 @@ from sqlalchemy import text
 from app.core.database import engine
 from app.modules.auth.model import User
 from app.modules.auth.router import router as auth_router
+from app.modules.vehicles.model import Vehicle
 
 
 app = FastAPI(
