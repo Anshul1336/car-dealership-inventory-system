@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from typing import Literal
@@ -18,6 +18,7 @@ from app.modules.vehicles.enums import (
 from app.modules.vehicles.service import (
     create_vehicle,
     get_all_vehicles,
+    count_all_vehicles,
     get_vehicle_by_id,
     update_vehicle,
     delete_vehicle,
@@ -73,14 +74,18 @@ def list_vehicles(
     year: int | None = None,
     min_price: float | None = None,
     max_price: float | None = None,
+    search: str | None = None,
+    min_year: int | None = None,
+    max_year: int | None = None,
+    in_stock: bool | None = None,
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
-    sort_by: Literal["make", "model", "year", "price", "quantity"] | None = None,
+    sort_by: Literal["make", "model", "year", "price", "quantity", "created_at"] | None = None,
     order: Literal["asc", "desc"] = "asc",
     db: Session = Depends(get_db),
+    response: Response = None,
 ):
-    return get_all_vehicles(
-        db=db,
+    filters = dict(
         make=make,
         model=model,
         category=category,
@@ -89,6 +94,18 @@ def list_vehicles(
         year=year,
         min_price=min_price,
         max_price=max_price,
+        search=search,
+        min_year=min_year,
+        max_year=max_year,
+        in_stock=in_stock,
+    )
+
+    total = count_all_vehicles(db=db, **filters)
+    response.headers["X-Total-Count"] = str(total)
+
+    return get_all_vehicles(
+        db=db,
+        **filters,
         skip=skip,
         limit=limit,
         sort_by=sort_by,

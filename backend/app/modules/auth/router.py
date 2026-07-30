@@ -16,6 +16,8 @@ from app.modules.auth.service import (
     get_user_by_email,
     authenticate_user,
 )
+from app.modules.auth.dependencies import get_current_user
+from app.modules.auth.model import User
 
 router = APIRouter(
     prefix="/api/v1/auth",
@@ -71,3 +73,13 @@ def login(
         "access_token": access_token,
         "token_type": "bearer",
     }
+
+
+@router.get(
+    "/me",
+    response_model=UserResponse,
+)
+def read_current_user(
+    current_user: User = Depends(get_current_user),
+):
+    return current_user

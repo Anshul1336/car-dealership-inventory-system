@@ -19,4 +19,6 @@ email-validator
 
 pytest
 pytest-asyncio
+pytest-html
+pytest-cov
 httpx

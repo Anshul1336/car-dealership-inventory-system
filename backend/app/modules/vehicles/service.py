@@ -35,6 +35,10 @@ def get_all_vehicles(
     year: int | None = None,
     min_price: float | None = None,
     max_price: float | None = None,
+    search: str | None = None,
+    min_year: int | None = None,
+    max_year: int | None = None,
+    in_stock: bool | None = None,
     skip: int = 0,
     limit: int = 10,
     sort_by: str | None = None,
@@ -66,6 +70,21 @@ def get_all_vehicles(
     if max_price is not None:
         query = query.where(Vehicle.price <= max_price)
 
+    if search:
+        like = f"%{search}%"
+        query = query.where(
+            Vehicle.make.ilike(like) | Vehicle.model.ilike(like)
+        )
+
+    if min_year is not None:
+        query = query.where(Vehicle.year >= min_year)
+
+    if max_year is not None:
+        query = query.where(Vehicle.year <= max_year)
+
+    if in_stock:
+        query = query.where(Vehicle.quantity > 0)
+
     if sort_by:
         column = getattr(Vehicle, sort_by)
 
@@ -77,6 +96,65 @@ def get_all_vehicles(
     query = query.offset(skip).limit(limit)
 
     return db.scalars(query).all()
+
+
+def count_all_vehicles(
+    db: Session,
+    make: str | None = None,
+    model: str | None = None,
+    category: Category | None = None,
+    fuel_type: FuelType | None = None,
+    transmission: Transmission | None = None,
+    year: int | None = None,
+    min_price: float | None = None,
+    max_price: float | None = None,
+    search: str | None = None,
+    min_year: int | None = None,
+    max_year: int | None = None,
+    in_stock: bool | None = None,
+):
+    query = select(func.count()).select_from(Vehicle)
+
+    if make:
+        query = query.where(Vehicle.make.ilike(f"%{make}%"))
+
+    if model:
+        query = query.where(Vehicle.model.ilike(f"%{model}%"))
+
+    if category:
+        query = query.where(Vehicle.category == category)
+
+    if fuel_type:
+        query = query.where(Vehicle.fuel_type == fuel_type)
+
+    if transmission:
+        query = query.where(Vehicle.transmission == transmission)
+
+    if year:
+        query = query.where(Vehicle.year == year)
+
+    if min_price is not None:
+        query = query.where(Vehicle.price >= min_price)
+
+    if max_price is not None:
+        query = query.where(Vehicle.price <= max_price)
+
+    if search:
+        like = f"%{search}%"
+        query = query.where(
+            Vehicle.make.ilike(like) | Vehicle.model.ilike(like)
+        )
+
+    if min_year is not None:
+        query = query.where(Vehicle.year >= min_year)
+
+    if max_year is not None:
+        query = query.where(Vehicle.year <= max_year)
+
+    if in_stock:
+        query = query.where(Vehicle.quantity > 0)
+
+    return db.scalar(query) or 0
 
 
 def get_vehicle_by_id(db: Session, vehicle_id: int):
