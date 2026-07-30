@@ -89,7 +89,7 @@ export default function AuthModal() {
                   className={controlClass}
                   {...register("mobile", {
                     required: "Mobile number is required",
-                    pattern: { value: /^\d{7,15}$/, message: "Enter a valid mobile number" },
+                    pattern: { value: /^\d{10}$/, message: "Enter a 10-digit mobile number" },
                   })}
                 />
                 {errors.mobile ? <p className="text-xs font-medium text-destructive">{errors.mobile.message}</p> : null}
@@ -127,10 +127,21 @@ export default function AuthModal() {
               className={controlClass}
               {...register("password", {
                 required: "Password is required",
-                minLength: { value: 6, message: "Use at least 6 characters" },
+                ...(isRegister
+                  ? {
+                      minLength: { value: 8, message: "Use at least 8 characters" },
+                      pattern: {
+                        value: /^(?=.*[A-Za-z])(?=.*\d).+$/,
+                        message: "Include at least one letter and one number",
+                      },
+                    }
+                  : {}),
               })}
             />
             {errors.password ? <p className="text-xs font-medium text-destructive">{errors.password.message}</p> : null}
+            {isRegister ? (
+              <p className="text-xs text-muted-foreground">At least 8 characters, with a letter and a number.</p>
+            ) : null}
           </div>
 
           <button
