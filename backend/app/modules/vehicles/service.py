@@ -3,8 +3,10 @@ from sqlalchemy.orm import Session
 from app.modules.vehicles.model import Vehicle
 from app.modules.vehicles.schema import VehicleCreate
 from app.modules.vehicles.schema import VehicleUpdate
-from sqlalchemy import select
+from sqlalchemy import select, func
 from app.modules.vehicles.model import Vehicle
+from fastapi import HTTPException, status
+
 
 
 def create_vehicle(db: Session, vehicle: VehicleCreate):
@@ -73,7 +75,7 @@ def get_all_vehicles(
             query = query.order_by(column.asc())
 
     query = query.offset(skip).limit(limit)
-    
+
     return db.scalars(query).all()
 
 
@@ -112,3 +114,85 @@ def delete_vehicle(db: Session, vehicle_id: int):
     db.commit()
 
     return db_vehicle
+
+def purchase_vehicle(
+    db: Session,
+    vehicle_id: int,
+    quantity: int,
+):
+    vehicle = db.get(Vehicle, vehicle_id)
+
+    if not vehicle:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Vehicle not found",
+        )
+
+    if vehicle.quantity < quantity:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Insufficient stock",
+        )
+
+    vehicle.quantity -= quantity
+
+    db.commit()
+    db.refresh(vehicle)
+
+    return vehicle
+
+def restock_vehicle(
+    db: Session,
+    vehicle_id: int,
+    quantity: int,
+):
+    vehicle = db.get(Vehicle, vehicle_id)
+
+    if not vehicle:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Vehicle not found",
+        )
+
+    vehicle.quantity += quantity
+
+    db.commit()
+    db.refresh(vehicle)
+
+    return vehicle
+
+def get_inventory_stats(db: Session):
+    total_vehicle_models = db.scalar(
+        select(func.count(Vehicle.id))
+    )
+
+    total_stock = db.scalar(
+        select(func.sum(Vehicle.quantity))
+    ) or 0
+
+    inventory_value = db.scalar(
+        select(func.sum(Vehicle.price * Vehicle.quantity))
+    ) or 0
+
+    out_of_stock = db.scalar(
+        select(func.count(Vehicle.id)).where(Vehicle.quantity == 0)
+    ) or 0
+
+    return {
+        "total_vehicle_models": total_vehicle_models,
+        "total_stock": total_stock,
+        "inventory_value": inventory_value,
+        "out_of_stock": out_of_stock,
+    }
+
+def get_low_stock_vehicles(
+    db: Session,
+    threshold: int = 5,
+):
+    query = (
+        select(Vehicle)
+        .where(Vehicle.quantity <= threshold)
+        .order_by(Vehicle.quantity.asc())
+    )
+
+    return db.scalars(query).all()

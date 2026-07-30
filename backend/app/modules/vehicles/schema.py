@@ -5,7 +5,6 @@ from app.modules.vehicles.enums import (
     FuelType,
     Transmission,
 )
-
 class VehicleBase(BaseModel):
     make: str = Field(..., min_length=2, max_length=50)
     model: str = Field(..., min_length=1, max_length=50)
@@ -47,3 +46,19 @@ class VehicleResponse(VehicleBase):
 
     class Config:
         from_attributes = True
+
+from pydantic import BaseModel, Field
+
+class PurchaseRequest(BaseModel):
+    quantity: int = Field(..., gt=0)
+
+class QuantityRequest(BaseModel):
+    quantity: int = Field(..., gt=0)
+
+
+
+class InventoryStatsResponse(BaseModel):
+    total_vehicle_models: int
+    total_stock: int
+    inventory_value: float
+    out_of_stock: int

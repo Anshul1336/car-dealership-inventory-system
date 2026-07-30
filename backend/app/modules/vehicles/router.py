@@ -6,6 +6,8 @@ from app.modules.vehicles.schema import (
     VehicleCreate,
     VehicleUpdate,
     VehicleResponse,
+    PurchaseRequest,
+    InventoryStatsResponse,
 )
 from app.modules.vehicles.enums import (
     Category,
@@ -19,15 +21,44 @@ from app.modules.vehicles.service import (
     get_vehicle_by_id,
     update_vehicle,
     delete_vehicle,
+    purchase_vehicle,
+    restock_vehicle,
+    get_inventory_stats,
+    get_low_stock_vehicles,
 )
 from app.modules.auth.dependencies import require_admin
 from app.modules.auth.model import User
+
+from app.modules.auth.dependencies import get_current_user
 
 router = APIRouter(
     prefix="/api/v1/vehicles",
     tags=["Vehicles"],
 )
 
+@router.get(
+    "/stats",
+    response_model=InventoryStatsResponse,
+)
+def inventory_stats(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    return get_inventory_stats(db)
+
+@router.get(
+    "/low-stock",
+    response_model=list[VehicleResponse],
+)
+def low_stock_vehicles(
+    threshold: int = Query(5, ge=0),
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    return get_low_stock_vehicles(
+        db=db,
+        threshold=threshold,
+    )
 
 @router.get(
     "/",
@@ -131,3 +162,38 @@ def remove_vehicle(
         )
 
     return {"message": "Vehicle deleted successfully"}
+
+
+@router.post(
+    "/{vehicle_id}/purchase",
+    response_model=VehicleResponse,
+)
+def purchase(
+    vehicle_id: int,
+    request: PurchaseRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    return purchase_vehicle(
+        db=db,
+        vehicle_id=vehicle_id,
+        quantity=request.quantity,
+    )
+
+
+@router.post(
+    "/{vehicle_id}/restock",
+    response_model=VehicleResponse,
+)
+def restock(
+    vehicle_id: int,
+    request: PurchaseRequest,   # or QuantityRequest if you renamed it
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    return restock_vehicle(
+        db=db,
+        vehicle_id=vehicle_id,
+        quantity=request.quantity,
+    )
+
