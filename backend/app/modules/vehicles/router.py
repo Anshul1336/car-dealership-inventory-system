@@ -16,22 +16,14 @@ from app.modules.vehicles.service import (
     update_vehicle,
     delete_vehicle,
 )
+from app.modules.auth.dependencies import require_admin
+from app.modules.auth.model import User
 
 router = APIRouter(
     prefix="/api/v1/vehicles",
     tags=["Vehicles"],
 )
 
-@router.post(
-    "/",
-    response_model=VehicleResponse,
-    status_code=status.HTTP_201_CREATED,
-)
-def add_vehicle(
-    vehicle: VehicleCreate,
-    db: Session = Depends(get_db),
-):
-    return create_vehicle(db, vehicle)
 
 @router.get(
     "/",
@@ -60,6 +52,19 @@ def get_vehicle(
 
     return vehicle
 
+
+@router.post(
+    "/",
+    response_model=VehicleResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def add_vehicle(
+    vehicle: VehicleCreate,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    return create_vehicle(db, vehicle)
+
 @router.put(
     "/{vehicle_id}",
     response_model=VehicleResponse,
@@ -68,12 +73,9 @@ def edit_vehicle(
     vehicle_id: int,
     vehicle: VehicleUpdate,
     db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
 ):
-    updated_vehicle = update_vehicle(
-        db,
-        vehicle_id,
-        vehicle,
-    )
+    updated_vehicle = update_vehicle(db, vehicle_id, vehicle)
 
     if updated_vehicle is None:
         raise HTTPException(
@@ -83,13 +85,11 @@ def edit_vehicle(
 
     return updated_vehicle
 
-@router.delete(
-    "/{vehicle_id}",
-    status_code=status.HTTP_200_OK,
-)
+@router.delete("/{vehicle_id}")
 def remove_vehicle(
     vehicle_id: int,
     db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
 ):
     deleted_vehicle = delete_vehicle(db, vehicle_id)
 
@@ -99,6 +99,4 @@ def remove_vehicle(
             detail="Vehicle not found",
         )
 
-    return {
-        "message": "Vehicle deleted successfully"
-    }
+    return {"message": "Vehicle deleted successfully"}
