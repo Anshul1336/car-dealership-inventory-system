@@ -2,7 +2,9 @@ from fastapi import FastAPI
 from app.core.config import settings
 from sqlalchemy import text
 from app.core.database import engine
-from backend.app.modules.auth.model import User
+from app.modules.auth.model import User
+from app.modules.auth.router import router as auth_router
+
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -27,3 +29,5 @@ def db_check():
     with engine.connect() as connection:
         connection.execute(text("SELECT 1"))
     return {"message": "Database connected successfully!"}
+
+app.include_router(auth_router)
