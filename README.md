@@ -2,6 +2,13 @@
 
 A full-stack dealership inventory system: a FastAPI + PostgreSQL backend and a React + Tailwind single-page frontend, with JWT authentication, role-based access control (admin vs. regular user), vehicle CRUD, search/filtering/sorting, purchasing, and restocking.
 
+## Live demo
+
+- **App**: https://car-dealership-inventory-system-hbw.vercel.app
+- **API**: https://car-dealership-inventory-system-xi-snowy.vercel.app/api/v1 (interactive docs at `/docs`)
+
+Both are deployed on Vercel (frontend as a static Vite build, backend as a Python serverless function) against a Neon Postgres database.
+
 ## Table of contents
 
 - [Tech stack](#tech-stack)
