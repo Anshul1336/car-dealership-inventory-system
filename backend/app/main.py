@@ -16,15 +16,24 @@ app = FastAPI(
     version=settings.APP_VERSION,
 )
 
-# Allow the Vite dev server (and common local ports) to call this API.
+# Allow the Vite dev server (and common local ports), plus any deployed
+# frontend origins supplied via ALLOWED_ORIGINS (comma-separated), e.g. a
+# Vercel URL like https://autostock-frontend.vercel.app.
+_dev_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://localhost:3001",
+]
+_extra_origins = [
+    origin.strip()
+    for origin in settings.ALLOWED_ORIGINS.split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-        "http://localhost:3001",
-    ],
+    allow_origins=_dev_origins + _extra_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

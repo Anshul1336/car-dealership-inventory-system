@@ -62,6 +62,36 @@ def low_stock_vehicles(
     )
 
 @router.get(
+    "/search",
+    response_model=list[VehicleResponse],
+)
+def search_vehicles(
+    make: str | None = None,
+    model: str | None = None,
+    category: Category | None = None,
+    min_price: float | None = None,
+    max_price: float | None = None,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    db: Session = Depends(get_db),
+    response: Response = None,
+):
+    """Dedicated search endpoint: by make, model, category, or price range."""
+    filters = dict(
+        make=make,
+        model=model,
+        category=category,
+        min_price=min_price,
+        max_price=max_price,
+    )
+
+    total = count_all_vehicles(db=db, **filters)
+    response.headers["X-Total-Count"] = str(total)
+
+    return get_all_vehicles(db=db, **filters, skip=skip, limit=limit)
+
+
+@router.get(
     "/",
     response_model=list[VehicleResponse],
 )
