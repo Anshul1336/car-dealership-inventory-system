@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from app.core.config import settings
 from sqlalchemy import text
 from app.core.database import engine
-from app.modules.users.model import User
+from backend.app.modules.auth.model import User
 
 app = FastAPI(
     title=settings.APP_NAME,

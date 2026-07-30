@@ -34,6 +34,12 @@ class User(Base):
         index=True,
     )
 
+    mobile: Mapped[str] = mapped_column(
+        String(15),
+        nullable=False,
+        unique=True,
+    )
+
     hashed_password: Mapped[str] = mapped_column(
         String,
         nullable=False,
