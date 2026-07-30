@@ -1,8 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
-
 from app.core.database import get_db
-
+from typing import Literal
 from app.modules.vehicles.schema import (
     VehicleCreate,
     VehicleUpdate,
@@ -43,6 +42,10 @@ def list_vehicles(
     year: int | None = None,
     min_price: float | None = None,
     max_price: float | None = None,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    sort_by: Literal["make", "model", "year", "price", "quantity"] | None = None,
+    order: Literal["asc", "desc"] = "asc",
     db: Session = Depends(get_db),
 ):
     return get_all_vehicles(
@@ -55,6 +58,10 @@ def list_vehicles(
         year=year,
         min_price=min_price,
         max_price=max_price,
+        skip=skip,
+        limit=limit,
+        sort_by=sort_by,
+        order=order,
     )
 
 @router.get(

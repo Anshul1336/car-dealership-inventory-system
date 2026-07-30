@@ -33,6 +33,10 @@ def get_all_vehicles(
     year: int | None = None,
     min_price: float | None = None,
     max_price: float | None = None,
+    skip: int = 0,
+    limit: int = 10,
+    sort_by: str | None = None,
+    order: str = "asc",
 ):
     query = select(Vehicle)
 
@@ -60,6 +64,16 @@ def get_all_vehicles(
     if max_price is not None:
         query = query.where(Vehicle.price <= max_price)
 
+    if sort_by:
+        column = getattr(Vehicle, sort_by)
+
+        if order == "desc":
+            query = query.order_by(column.desc())
+        else:
+            query = query.order_by(column.asc())
+
+    query = query.offset(skip).limit(limit)
+    
     return db.scalars(query).all()
 
 
