@@ -1,6 +1,8 @@
 from fastapi import FastAPI
-
 from app.core.config import settings
+from sqlalchemy import text
+from app.core.database import engine
+from app.modules.users.model import User
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -18,9 +20,7 @@ def root():
 
 
 
-from sqlalchemy import text
 
-from app.core.database import engine
 
 @app.get("/db-check")
 def db_check():
