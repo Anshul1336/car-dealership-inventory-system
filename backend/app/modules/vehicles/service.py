@@ -3,7 +3,8 @@ from sqlalchemy.orm import Session
 from app.modules.vehicles.model import Vehicle
 from app.modules.vehicles.schema import VehicleCreate
 from app.modules.vehicles.schema import VehicleUpdate
-
+from sqlalchemy import select
+from app.modules.vehicles.model import Vehicle
 
 
 def create_vehicle(db: Session, vehicle: VehicleCreate):
@@ -16,8 +17,50 @@ def create_vehicle(db: Session, vehicle: VehicleCreate):
     return db_vehicle
 
 
-def get_all_vehicles(db: Session):
-    return db.query(Vehicle).all()
+from app.modules.vehicles.enums import (
+    Category,
+    FuelType,
+    Transmission,
+)
+
+def get_all_vehicles(
+    db: Session,
+    make: str | None = None,
+    model: str | None = None,
+    category: Category | None = None,
+    fuel_type: FuelType | None = None,
+    transmission: Transmission | None = None,
+    year: int | None = None,
+    min_price: float | None = None,
+    max_price: float | None = None,
+):
+    query = select(Vehicle)
+
+    if make:
+        query = query.where(Vehicle.make.ilike(f"%{make}%"))
+
+    if model:
+        query = query.where(Vehicle.model.ilike(f"%{model}%"))
+
+    if category:
+        query = query.where(Vehicle.category == category)
+
+    if fuel_type:
+        query = query.where(Vehicle.fuel_type == fuel_type)
+
+    if transmission:
+        query = query.where(Vehicle.transmission == transmission)
+
+    if year:
+        query = query.where(Vehicle.year == year)
+
+    if min_price is not None:
+        query = query.where(Vehicle.price >= min_price)
+
+    if max_price is not None:
+        query = query.where(Vehicle.price <= max_price)
+
+    return db.scalars(query).all()
 
 
 def get_vehicle_by_id(db: Session, vehicle_id: int):

@@ -26,6 +26,3 @@ class FuelType(str, Enum):
 class Transmission(str, Enum):
     MANUAL = "Manual"
     AUTOMATIC = "Automatic"
-    AMT = "AMT"
-    CVT = "CVT"
-    DCT = "DCT"

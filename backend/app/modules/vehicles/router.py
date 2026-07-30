@@ -8,6 +8,11 @@ from app.modules.vehicles.schema import (
     VehicleUpdate,
     VehicleResponse,
 )
+from app.modules.vehicles.enums import (
+    Category,
+    FuelType,
+    Transmission,
+)
 
 from app.modules.vehicles.service import (
     create_vehicle,
@@ -30,9 +35,27 @@ router = APIRouter(
     response_model=list[VehicleResponse],
 )
 def list_vehicles(
+    make: str | None = None,
+    model: str | None = None,
+    category: Category | None = None,
+    fuel_type: FuelType | None = None,
+    transmission: Transmission | None = None,
+    year: int | None = None,
+    min_price: float | None = None,
+    max_price: float | None = None,
     db: Session = Depends(get_db),
 ):
-    return get_all_vehicles(db)
+    return get_all_vehicles(
+        db=db,
+        make=make,
+        model=model,
+        category=category,
+        fuel_type=fuel_type,
+        transmission=transmission,
+        year=year,
+        min_price=min_price,
+        max_price=max_price,
+    )
 
 @router.get(
     "/{vehicle_id}",
@@ -51,6 +74,7 @@ def get_vehicle(
         )
 
     return vehicle
+
 
 
 @router.post(
