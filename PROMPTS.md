@@ -11,7 +11,6 @@ Used early on to get the FastAPI/PostgreSQL environment running and, later, to d
 ### Environment setup
 
 ```
-how to install requirements.txt together and
 
 fastapi
 uvicorn[standard]
